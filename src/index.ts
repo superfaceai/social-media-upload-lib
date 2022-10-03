@@ -15,8 +15,8 @@ export enum UploadStrategy {
   RESUMABLE_UPLOAD = 'resumableUpload',
 }
 
-interface UploadVideoInput<VideoType> {
-  video: VideoType;
+export interface UploadVideoInput {
+  video: string | URL;
   profileId?: string;
   caption?: string;
 }
@@ -32,7 +32,7 @@ enum UploadState {
 type ProfilesResult = Array<{ id: string; name: string }>;
 
 export async function publishVideo(
-  input: UploadVideoInput<string | URL>,
+  input: UploadVideoInput,
   provider: string,
   providerOptions?: { [key: string]: unknown }
 ): Promise<PublishResult> {
@@ -96,7 +96,7 @@ export async function publishVideo(
 
 const PROCESSING_TIMEOUT = 5 * 60 * 1000; // completely arbitrary
 async function publishUrl(
-  input: UploadVideoInput<URL>,
+  input: UploadVideoInput & { video: URL },
   provider: string,
   providerOptions: { [key: string]: unknown }
 ): Promise<PublishResult> {
@@ -216,7 +216,7 @@ async function publishUrl(
 }
 
 async function publishFile(
-  _input: UploadVideoInput<string>,
+  _input: UploadVideoInput & { video: string },
   _provider: string,
   _providerOptions: { [key: string]: unknown }
 ): Promise<PublishResult> {
