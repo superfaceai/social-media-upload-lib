@@ -48,11 +48,7 @@ export async function publishVideo(
   } else {
     try {
       url = new URL(input.video);
-    } catch (err) {
-      if (!(err instanceof TypeError)) {
-        throw err;
-      }
-    }
+    } catch {}
 
     if (url === undefined) {
       if (fs.existsSync(input.video)) {
