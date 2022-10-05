@@ -25,12 +25,16 @@
   "homepage": "https://github.com/superfaceai/social-media-upload-lib#readme",
   "dependencies": {
     "@superfaceai/one-sdk": "^2.0.0",
-    "debug": "^4.3.4"
+    "debug": "^4.3.4",
+    "form-data-encoder": "1",
+    "formdata-node": "4",
+    "node-fetch": "2"
   },
   "devDependencies": {
     "@types/debug": "^4.1.7",
     "@types/jest": "^29.0.3",
     "@types/node": "^18.7.18",
+    "@types/node-fetch": "2",
     "dotenv": "^16.0.2",
     "jest": "^29.0.3",
     "prettier": "^2.7.1",

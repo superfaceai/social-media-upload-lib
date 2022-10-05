@@ -1,13 +1,14 @@
 import { SuperfaceClient } from '@superfaceai/one-sdk';
 import fs from 'fs';
 import debug from 'debug';
+import { tiktokPublishFile } from './tiktok';
 
 const debugLog = debug('superface:social-media-upload-lib');
 const sdk = new SuperfaceClient();
 
 export interface PublishResult {
-  postId: string;
-  url: string;
+  postId: string | undefined;
+  url: string | undefined;
 }
 
 export enum UploadStrategy {
@@ -216,10 +217,14 @@ async function publishUrl(
 }
 
 async function publishFile(
-  _input: UploadVideoInput & { video: string },
-  _provider: string,
-  _providerOptions: { [key: string]: unknown }
+  input: UploadVideoInput & { video: string },
+  provider: string,
+  providerOptions: { [key: string]: unknown }
 ): Promise<PublishResult> {
+  switch (provider) {
+    case 'tiktok':
+      return tiktokPublishFile(input, providerOptions);
+  }
   throw new Error('Not yet implemented.');
 }
 
@@ -229,7 +234,8 @@ function getSupportedUploadStrategies(provider: string): UploadStrategy[] {
     case 'instagram':
       return [UploadStrategy.REMOTE_URL];
     case 'facebook':
-      return [UploadStrategy.REMOTE_URL, UploadStrategy.RESUMABLE_UPLOAD];
+    case 'tiktok':
+      return [UploadStrategy.RESUMABLE_UPLOAD];
     case 'mock':
       return [UploadStrategy.REMOTE_URL, UploadStrategy.RESUMABLE_UPLOAD];
     default:
