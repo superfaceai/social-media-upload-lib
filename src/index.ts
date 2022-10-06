@@ -1,8 +1,14 @@
 import { SuperfaceClient } from '@superfaceai/one-sdk';
 import fs from 'fs';
-import debug from 'debug';
+import path from 'path';
+import os from 'os';
 import { youtubePublishFile } from './youtube';
 import { tiktokPublishFile } from './tiktok';
+import { createWriteStream } from 'node:fs';
+import { pipeline } from 'node:stream';
+import { promisify } from 'node:util';
+import debug from 'debug';
+import fetch from 'node-fetch';
 
 const debugLog = debug('superface:social-media-upload');
 const sdk = new SuperfaceClient();
@@ -69,8 +75,22 @@ export async function publishVideo(
       );
     }
     if (strategies.includes(UploadStrategy.RESUMABLE_UPLOAD)) {
-      // TODO: download the URL, upload it as a file
-      throw new Error(`Uploading remote URLs not yet implemented.`);
+      debugLog(
+        `Provider ${provider} doesn't support URL uploads but supports resumable uploads, will download file...`
+      );
+      const tmpDirectory = await fs.promises.mkdtemp(
+        path.join(os.tmpdir(), 'sfsmul-')
+      );
+      try {
+        const filepath = await downloadFile(tmpDirectory, url);
+        return await publishFile(
+          { ...input, video: filepath },
+          provider,
+          providerOptions || {}
+        );
+      } finally {
+        await fs.promises.rmdir(tmpDirectory, { recursive: true });
+      }
     }
     throw new Error(`Provider "${provider}" not supported.`);
   }
@@ -85,7 +105,7 @@ export async function publishVideo(
     }
 
     throw new Error(
-      `Provider "${provider}" does not support uploading local files.`
+      `Provider "${provider}" does not support uploading local files and a public URL wasn't provided.`
     );
   }
 
@@ -214,4 +234,21 @@ function getSupportedUploadStrategies(provider: string): UploadStrategy[] {
     default:
       return [];
   }
+}
+
+async function downloadFile(directory: string, url: URL): Promise<string> {
+  const tmpFile = path.join(directory, `${new Date().getTime()}.file`);
+  debugLog(`Downloading ${url} to ${directory}...`);
+
+  const streamPipeline = promisify(pipeline);
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(
+      `Error during downloading of ${url}: Unexpected response ${response.status}: ${response.statusText}`
+    );
+  }
+  await streamPipeline(response.body, createWriteStream(tmpFile));
+  debugLog('Successfully downloaded.');
+
+  return tmpFile;
 }

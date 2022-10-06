@@ -8,8 +8,9 @@ describe('youtube', () => {
   test('local file upload works', async () => {
     const publishResult = publishVideo(
       {
-        video: './example-media/sample-5s.mp4',
-        caption: 'Single video from Superface Upload Lib.',
+        video: './example-media/vertical.mp4',
+        caption: 'Single short from Superface Upload Lib.',
+        shortFormVideo: true,
       },
       'youtube',
       {
@@ -18,11 +19,22 @@ describe('youtube', () => {
         },
       }
     );
-    // try {
-    //   await publishResult;
-    // } catch (err) {
-    //   console.error({ error: (err as any).response.data.error.errors });
-    // }
+    await expect(publishResult).resolves.not.toThrowError();
+  });
+
+  test('url upload works', async () => {
+    const publishResult = publishVideo(
+      {
+        video: 'https://download.samplelib.com/mp4/sample-5s.mp4',
+        caption: 'Single downloaded video from Superface Upload Lib.',
+      },
+      'youtube',
+      {
+        security: {
+          accessToken: process.env['YOUTUBE_ACCESS_TOKEN'],
+        },
+      }
+    );
     await expect(publishResult).resolves.not.toThrowError();
   });
 });
