@@ -1,7 +1,7 @@
 {
   "name": "@superfaceai/social-media-upload",
   "version": "1.0.0-beta.0 ",
-  "description": "",
+  "description": "A small library for unified upload to social media sites. (Workaround.)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
