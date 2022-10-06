@@ -29,7 +29,7 @@ jobs:
 
       # Test the project
       - name: Tests
-        run: yarn test
+        run: yarn test:mock # TODO: change
 
       # Git configuration
       - name: Git configuration
@@ -61,22 +61,22 @@ jobs:
         env:
           RELEASE_LEVEL: ${{ github.event.inputs.release-level }}
 
-      # Update changelog unreleased section with new version
-      - name: Update changelog
-        uses: superfaceai/release-changelog-action@v1
-        if: startsWith(github.event.inputs.release-level, 'pre') != true
-        with:
-          path-to-changelog: CHANGELOG.md
-          version: ${{ env.NEW_VERSION }}
-          operation: release
+      # # Update changelog unreleased section with new version
+      # - name: Update changelog
+      #   uses: superfaceai/release-changelog-action@v1
+      #   if: startsWith(github.event.inputs.release-level, 'pre') != true
+      #   with:
+      #     path-to-changelog: CHANGELOG.md
+      #     version: ${{ env.NEW_VERSION }}
+      #     operation: release
 
-      # Commit changelog changes
-      - name: Commit CHANGELOG.md and package.json changes and create tag
-        run: |
-          git add "package.json"
-          git add "CHANGELOG.md"
-          git commit -m "chore: release ${{ env.NEW_VERSION }}"
-          git tag ${{ env.NEW_VERSION }}
+      # # Commit changelog changes
+      # - name: Commit CHANGELOG.md and package.json changes and create tag
+      #   run: |
+      #     git add "package.json"
+      #     git add "CHANGELOG.md"
+      #     git commit -m "chore: release ${{ env.NEW_VERSION }}"
+      #     git tag ${{ env.NEW_VERSION }}
 
       # Publish version to public repository
       - name: Publish
@@ -91,31 +91,31 @@ jobs:
         run: |
           git push origin && git push --tags
 
-      # Read version changelog
-      - id: get-changelog
-        name: Get release version changelog
-        if: startsWith(github.event.inputs.release-level, 'pre') != true
-        uses: superfaceai/release-changelog-action@v1
-        with:
-          path-to-changelog: CHANGELOG.md
-          version: ${{ env.NEW_VERSION }}
-          operation: read
+      # # Read version changelog
+      # - id: get-changelog
+      #   name: Get release version changelog
+      #   if: startsWith(github.event.inputs.release-level, 'pre') != true
+      #   uses: superfaceai/release-changelog-action@v1
+      #   with:
+      #     path-to-changelog: CHANGELOG.md
+      #     version: ${{ env.NEW_VERSION }}
+      #     operation: read
 
-      # Update release documentation
-      - name: Update GitHub release documentation
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ env.NEW_VERSION }}
-          body: ${{ steps.get-changelog.outputs.changelog }}
-          prerelease: ${{ startsWith(github.event.inputs.release-level, 'pre') }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # # Update release documentation
+      # - name: Update GitHub release documentation
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     tag_name: ${{ env.NEW_VERSION }}
+      #     body: ${{ steps.get-changelog.outputs.changelog }}
+      #     prerelease: ${{ startsWith(github.event.inputs.release-level, 'pre') }}
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Trigger Daily test for released version (excluding pre and rc)
-      - name: Trigger Daily Test
-        if: startsWith(github.event.inputs.release-level, 'pre') != true
-        uses: peter-evans/repository-dispatch@v1
-        with:
-          token: ${{ secrets.GH_BOT_PAT }}
-          repository: superfaceai/superface-daily
-          event-type: on-demand-test
+      # # Trigger Daily test for released version (excluding pre and rc)
+      # - name: Trigger Daily Test
+      #   if: startsWith(github.event.inputs.release-level, 'pre') != true
+      #   uses: peter-evans/repository-dispatch@v1
+      #   with:
+      #     token: ${{ secrets.GH_BOT_PAT }}
+      #     repository: superfaceai/superface-daily
+      #     event-type: on-demand-test
