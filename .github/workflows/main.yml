@@ -32,8 +32,8 @@ jobs:
         run: yarn install
       - name: Format
         run: yarn format
-      - name: Lint
-        run: yarn lint
+      # - name: Lint
+      #   run: yarn lint
 
   test:
     name: Mock tests
