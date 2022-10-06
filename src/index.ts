@@ -21,6 +21,8 @@ export interface UploadVideoInput {
   video: string | URL;
   profileId?: string;
   caption?: string;
+  shortFormVideo?: boolean;
+  uploadType?: 'video';
 }
 
 enum UploadState {

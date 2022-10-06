@@ -22,6 +22,12 @@ export async function youtubePublishFile(
   const authorizationHeader = `Bearer ${_providerOptions.security.accessToken}`;
   const stats = await fs.promises.stat(input.video);
 
+  let title = input.caption || '';
+  // https://www.ayrshare.com/post-youtube-shorts-with-an-api/
+  if (input.shortFormVideo) {
+    title += '#Shorts';
+  }
+
   debugLog('Initiating upload...');
   const initResponse = await fetch(
     `${YOUTUBE_API}/videos?uploadType=resumable&part=snippet`,
@@ -29,7 +35,7 @@ export async function youtubePublishFile(
       method: 'post',
       body: JSON.stringify({
         snippet: {
-          title: input.caption,
+          title,
         },
       }),
       headers: {
