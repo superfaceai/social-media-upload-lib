@@ -1,5 +1,5 @@
 {
-  "name": "social-media-upload-lib",
+  "name": "@superfaceai/social-media-upload",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",

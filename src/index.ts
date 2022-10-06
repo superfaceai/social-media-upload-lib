@@ -3,7 +3,7 @@ import fs from 'fs';
 import debug from 'debug';
 import { tiktokPublishFile } from './tiktok';
 
-const debugLog = debug('superface:social-media-upload-lib');
+const debugLog = debug('superface:social-media-upload');
 const sdk = new SuperfaceClient();
 
 export interface PublishResult {
