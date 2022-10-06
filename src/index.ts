@@ -1,6 +1,7 @@
 import { SuperfaceClient } from '@superfaceai/one-sdk';
 import fs from 'fs';
 import debug from 'debug';
+import { youtubePublishFile } from './youtube';
 import { tiktokPublishFile } from './tiktok';
 
 const debugLog = debug('superface:social-media-upload');
@@ -29,8 +30,6 @@ enum UploadState {
   IN_PROGRESS = 'inProgress',
   PUBLISHED = 'published',
 }
-
-type ProfilesResult = Array<{ id: string; name: string }>;
 
 export async function publishVideo(
   input: UploadVideoInput,
@@ -105,39 +104,10 @@ async function publishUrl(
     'social-media/publish-post@1.3.0'
   );
 
-  let profileId = input.profileId;
-  if (!profileId) {
-    debugLog('No profileId supplied, fetching publishing profiles.');
-    const getPublishingProfilesProfile = await sdk.getProfile(
-      'social-media/publishing-profiles@1.0.1'
-    );
-
-    const publishingProfilesResult = (
-      await getPublishingProfilesProfile
-        .getUseCase('GetProfilesForPublishing')
-        .perform(
-          {},
-          {
-            provider,
-            ...providerOptions,
-          }
-        )
-    ).unwrap() as { profiles: ProfilesResult };
-
-    const publishingProfiles = publishingProfilesResult.profiles;
-    if (publishingProfiles.length === 0) {
-      throw new Error(
-        'Found no available publishing profiles and no profile ID supplied.'
-      );
-    }
-    profileId = publishingProfiles[0].id;
-    debugLog(`Got profileId: "${profileId}".`);
-  }
-
   const registerResult = (
     await uploadProfile.getUseCase('RegisterUpload').perform(
       {
-        profileId,
+        profileId: input.profileId,
         caption: input.caption,
         url: input.video.toString(),
         uploadType: 'video',
@@ -197,7 +167,7 @@ async function publishUrl(
   const result = (
     await publishProfile.getUseCase('PublishPost').perform(
       {
-        profileId,
+        profileId: input.profileId,
         text: input.caption,
         attachments: [{ id: uploadId }],
       },
@@ -218,6 +188,8 @@ async function publishFile(
   providerOptions: { [key: string]: unknown }
 ): Promise<PublishResult> {
   switch (provider) {
+    case 'youtube':
+      return youtubePublishFile(input, providerOptions);
     case 'tiktok':
       return tiktokPublishFile(input, providerOptions);
   }
@@ -230,6 +202,9 @@ function getSupportedUploadStrategies(provider: string): UploadStrategy[] {
     case 'instagram':
       return [UploadStrategy.REMOTE_URL];
     case 'facebook':
+      return [UploadStrategy.REMOTE_URL];
+    case 'youtube':
+      return [UploadStrategy.RESUMABLE_UPLOAD];
     case 'tiktok':
       return [UploadStrategy.RESUMABLE_UPLOAD];
     case 'mock':
