@@ -89,7 +89,8 @@ export async function publishVideo(
           providerOptions || {}
         );
       } finally {
-        await fs.promises.rmdir(tmpDirectory, { recursive: true });
+        debugLog(`Deleting ${tmpDirectory}...`);
+        await fs.promises.rm(tmpDirectory, { recursive: true });
       }
     }
     throw new Error(`Provider "${provider}" not supported.`);
